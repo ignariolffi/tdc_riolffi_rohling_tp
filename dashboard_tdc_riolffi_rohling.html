@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TFI - Riolffi Rohling</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:#f3f4f6;
+    --panel:#ffffff;
+    --panel2:#f8fafc;
+    --border:#d1d5db;
+    --accent:   #4f8ef7;
+    --green:    #00d68f;
+    --orange:   #f5a623;
+    --red:      #ff4d4d;
+    --purple:   #a78bfa;
+    --pink:     #f472b6;
+    --text:#1f2937;
+    --muted:#6b7280;
+  }
+
+  body {
+    background: #f3f4f6;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+  .logo {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, #4f8ef7 0%, #a78bfa 100%);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0;
+  }
+  .header-title { font-weight: 700; font-size: 15px; letter-spacing: -0.02em; }
+  .header-sub   { color: var(--muted); font-size: 10px; margin-top: 1px; }
+  .header-badge {
+    margin-left: auto;
+    padding: 5px 12px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    border: 1px solid;
+  }
+  .badge-ok  { background: #0a2a1a; border-color: var(--green); color: var(--green); }
+  .badge-err { background: #2a0a0a; border-color: var(--red);   color: var(--red);   }
+
+  .main { display: flex; flex: 1; overflow: hidden; }
+
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 14px 12px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .section-label {
+    color: var(--muted);
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .esc-btn {
+    width: 100%; text-align: left;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 7px 10px;
+    cursor: pointer;
+    color: var(--text);
+    margin-bottom: 4px;
+    transition: all 0.15s;
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .esc-btn:hover  { border-color: #3a3f55; background: var(--panel2); }
+  .esc-btn.active { border-color: var(--accent); background: #0f1a30; color: var(--accent); }
+  .esc-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .esc-name { font-weight: 600; font-size: 11.5px; display: block; }
+  .esc-desc { color: var(--muted); font-size: 10px; display: block; margin-top: 1px; }
+  .esc-btn.active .esc-desc { color: #6ea8fe; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+  .slider-group { margin-bottom: 11px; }
+  .slider-row {
+    display: flex; justify-content: space-between;
+    align-items: baseline; margin-bottom: 3px;
+  }
+  .slider-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .slider-val   { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
+  input[type=range] {
+    width: 100%; height: 3px; cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+    border-radius: 2px; outline: none;
+    background: var(--border);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 13px; height: 13px; border-radius: 50%;
+    cursor: pointer; transition: transform 0.1s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+  .slider-ends {
+    display: flex; justify-content: space-between;
+    color: var(--muted); font-size: 9px; margin-top: 2px;
+  }
+
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 16px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .metric-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+  }
+  .metric-label { color: var(--muted); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+  .metric-val   { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; }
+  .metric-unit  { font-size: 10px; color: var(--muted); margin-left: 2px; }
+  .metric-sub   { color: var(--muted); font-size: 9px; margin-top: 2px; }
+
+  .chart-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    padding: 12px 12px 8px;
+    margin-bottom: 12px;
+  }
+  .chart-title {
+    color: var(--muted);
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 8px;
+  }
+  canvas { width: 100% !important; display: block; border-radius: 6px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--muted); }
+  .legend-line { width: 20px; height: 2px; border-radius: 1px; flex-shrink: 0; }
+  .legend-dashed { width: 20px; height: 0; border-top: 2px dashed; flex-shrink: 0; }
+
+  .info-bar {
+    background:#ffffff;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 10px 14px;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .info-bar span { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">☀</div>
+  <div>
+    <div class="header-title">TFI - Riolffi Rohling</div>
+    <div class="header-sub">Simulación de un controlador PI para ajuste automático del brillo · UTN-FRBA · Ignacio Riolffi & Nataly Rohling</div>
+  </div>
+  <div class="header-badge badge-ok" id="statusBadge">● Estable (±50 lux)</div>
+</header>
+
+<div class="main">
+
+  <aside class="sidebar">
+
+    <!-- ESCENARIOS (idénticos a lumibright_sim.py) -->
+    <div class="section-label">Escenario de prueba</div>
+    <div id="escButtons"></div>
+
+    <hr class="divider">
+
+    <!-- CONTROLADOR PI -->
+    <div class="section-label">Controlador PI</div>
+
+    <div class="slider-group">
+      <div class="slider-row">
+        <span class="slider-label">Valor de entrada (Referencia)</span>
+        <span class="slider-val" id="val-setpoint" style="color:#f472b6"></span>
+      </div>
+      <input type="range" id="sl-setpoint" min="100" max="1000" step="10" value="500"
+        style="--c:#f472b6" oninput="sync('setpoint');simulate()">
+      <div class="slider-ends"><span>100 lux</span><span>1000 lux</span></div>
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-row">
+        <span class="slider-label">Kp</span>
+        <span class="slider-val" id="val-kp" style="color:#4f8ef7"></span>
+      </div>
+      <input type="range" id="sl-kp" min="0" max="0.005" step="0.0001" value="0.0008"
+        style="--c:#4f8ef7" oninput="sync('kp');simulate()">
+      <div class="slider-ends"><span>0</span><span>0.005</span></div>
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-row">
+        <span class="slider-label">Ki</span>
+        <span class="slider-val" id="val-ki" style="color:#4f8ef7"></span>
+      </div>
+      <input type="range" id="sl-ki" min="0" max="0.001" step="0.00001" value="0.0001"
+        style="--c:#4f8ef7" oninput="sync('ki');simulate()">
+      <div class="slider-ends"><span>0</span><span>0.001</span></div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- SISTEMA -->
+    <div class="section-label">Sistema</div>
+
+    <div class="slider-group">
+      <div class="slider-row">
+        <span class="slider-label">Ruido sensor — σ</span>
+        <span class="slider-val" id="val-ruido" style="color:#f5a623"></span>
+      </div>
+      <input type="range" id="sl-ruido" min="0" max="50" step="1" value="8"
+        style="--c:#f5a623" oninput="sync('ruido');simulate()">
+      <div class="slider-ends"><span>0 lux</span><span>50 lux</span></div>
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-row">
+        <span class="slider-label">Duty cycle inicial</span>
+        <span class="slider-val" id="val-dutyIni" style="color:#a78bfa"></span>
+      </div>
+      <input type="range" id="sl-dutyIni" min="0" max="100" step="1" value="43"
+        style="--c:#a78bfa" oninput="sync('dutyIni');simulate()">
+      <div class="slider-ends"><span>0 %</span><span>100 %</span></div>
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-row">
+        <span class="slider-label">Duración simulación</span>
+        <span class="slider-val" id="val-tSim" style="color:#5a6380"></span>
+      </div>
+      <input type="range" id="sl-tSim" min="10" max="120" step="5" value="40"
+        style="--c:#5a6380" oninput="sync('tSim');simulate()">
+      <div class="slider-ends"><span>10 s</span><span>120 s</span></div>
+    </div>
+
+  </aside>
+
+  <div class="content">
+
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="metric-label">Error máx. (ee)</div>
+        <div><span class="metric-val" id="m-errMax" style="color:#00d68f">—</span><span class="metric-unit">lux</span></div>
+        <div class="metric-sub">Estado estable</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Error medio (ee)</div>
+        <div><span class="metric-val" id="m-errMed" style="color:#4f8ef7">—</span><span class="metric-unit">lux</span></div>
+        <div class="metric-sub">Estado estable</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Duty cycle final</div>
+        <div><span class="metric-val" id="m-duty" style="color:#a78bfa">—</span><span class="metric-unit">%</span></div>
+        <div class="metric-sub">Actuador PWM</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Valor de entrada (Referencia)</div>
+        <div><span class="metric-val" id="m-sp" style="color:#f472b6">500</span><span class="metric-unit">lux</span></div>
+        <div class="metric-sub">ISO 9241</div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Señales de iluminancia — Ambiente · Total medido · Valor de entrada (Referencia)</div>
+      <canvas id="c1" height="160"></canvas>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-line" style="background:#4f8ef7"></div>Luz ambiente</div>
+        <div class="legend-item"><div class="legend-line" style="background:#f5a623"></div>Lux total medido (sensor)</div>
+        <div class="legend-item"><div class="legend-dashed" style="border-color:#f472b6"></div>Valor de entrada (Referencia)</div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Señal de error — e[k] = setpoint − lux_total</div>
+      <canvas id="c2" height="140"></canvas>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-line" style="background:#ff4d4d"></div>Error e[k]</div>
+        <div class="legend-item"><div class="legend-dashed" style="border-color:#00d68f"></div>Banda ±50 lux</div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Señal de control — Duty cycle PWM del actuador</div>
+      <canvas id="c3" height="140"></canvas>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-line" style="background:#a78bfa"></div>Duty cycle (%)</div>
+        <div class="legend-item"><div class="legend-dashed" style="border-color:#ff4d4d"></div>Límites sat. (0% / 100%)</div>
+      </div>
+    </div>
+
+    
+<div class="chart-card">
+<div class="chart-title">¿Qué representa cada escenario?</div>
+<ul style="line-height:1.8;padding-left:18px">
+<li><b>Escalón de subida:</b> se enciende una luz y el controlador baja el brillo de la pantalla.</li>
+<li><b>Escalón de bajada:</b> se apaga una luz y el controlador aumenta el brillo.</li>
+<li><b>Ruido:</b> pequeñas variaciones de iluminación; el controlador intenta mantener el brillo estable.</li>
+<li><b>Saturación:</b> hay tanta luz ambiente que el sistema ya no puede compensarla.</li>
+<li><b>Flash:</b> aparece una luz intensa durante unos segundos y luego el sistema vuelve a estabilizarse.</li>
+</ul>
+</div>
+
+<div class="info-bar" id="infoBar" style="display:none"></div>
+
+  </div>
+</div>
+
+<script>
+// ── ESCENARIOS — idénticos a las funciones perfil_*() de lumibright_sim.py ────
+const ESCENARIOS = [
+  { id:"escalon_subida", icon:"↑", name:"Escalón subida",  desc:"200 → 600 lux a los 15 s" },
+  { id:"escalon_bajada", icon:"↓", name:"Escalón bajada",  desc:"400 → 80 lux a los 15 s"  },
+  { id:"ruido",          icon:"~", name:"Ruido del sensor",desc:"300 ± 60 lux aleatorio"    },
+  { id:"saturacion",     icon:"⊗", name:"Saturación",      desc:"650 lux constante"         },
+  { id:"flash",          icon:"⚡",name:"Flash de luz",    desc:"1200 lux por 2 s a los 10 s" },
+];
+
+let escenario = "escalon_bajada";
+
+const escContainer = document.getElementById("escButtons");
+ESCENARIOS.forEach(e => {
+  const btn = document.createElement("button");
+  btn.className = "esc-btn" + (e.id === escenario ? " active" : "");
+  btn.innerHTML = `<span class="esc-icon">${e.icon}</span><span><span class="esc-name">${e.name}</span><span class="esc-desc">${e.desc}</span></span>`;
+  btn.onclick = () => {
+    escenario = e.id;
+    document.querySelectorAll(".esc-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    simulate();
+  };
+  escContainer.appendChild(btn);
+});
+
+document.querySelectorAll("input[type=range]").forEach(sl => {
+  const c = sl.style.getPropertyValue("--c") || "#4f8ef7";
+  const style = document.createElement("style");
+  style.textContent = `#${sl.id}::-webkit-slider-thumb { background: ${c}; }`;
+  document.head.appendChild(style);
+});
+
+// ── SLIDERS ─────────────────────────────────────────────────────────────────
+const sliders = {
+  setpoint: { id:"sl-setpoint", val:"val-setpoint", unit:" lux" },
+  kp:       { id:"sl-kp",       val:"val-kp",       unit:""     },
+  ki:       { id:"sl-ki",       val:"val-ki",       unit:""     },
+  ruido:    { id:"sl-ruido",    val:"val-ruido",    unit:" lux" },
+  dutyIni:  { id:"sl-dutyIni",  val:"val-dutyIni",  unit:" %"   },
+  tSim:     { id:"sl-tSim",     val:"val-tSim",     unit:" s"   },
+};
+
+function sync(key) {
+  const s = sliders[key];
+  const v = parseFloat(document.getElementById(s.id).value);
+  const disp = v < 0.01 && v > 0 ? v.toFixed(5) : (Number.isInteger(v) ? v : parseFloat(v.toFixed(4)));
+  document.getElementById(s.val).textContent = disp + s.unit;
+}
+Object.keys(sliders).forEach(k => sync(k));
+function get(key) { return parseFloat(document.getElementById(sliders[key].id).value); }
+
+// ── LCG reproducible (equivalente a np.random.seed) ────────────────────────
+let seed = 42;
+function lcgRand() {
+  seed = (Math.imul(seed, 1664525) + 1013904223) | 0;
+  return (seed >>> 0) / 0xFFFFFFFF;
+}
+function randn() {
+  const u = Math.max(1e-10, lcgRand()), v = lcgRand();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+let simData = [];
+
+// ── PERFILES DE LUZ AMBIENTE — mismas funciones que perfil_*() en Python ──────
+function perfilAmbiente(N, dt) {
+  const t = k => k * dt;
+  switch (escenario) {
+    case "escalon_subida": // perfil_escalon_subida()
+      return Array.from({length:N}, (_,k) => t(k) < 15 ? 200 : 600);
+    case "escalon_bajada": // perfil_escalon_bajada()
+      return Array.from({length:N}, (_,k) => t(k) < 15 ? 400 : 80);
+    case "ruido":           // perfil_ruido()
+      return Array.from({length:N}, () => Math.max(0, 300 + (lcgRand()*2-1)*60));
+    case "saturacion":      // perfil_saturacion()
+      return Array.from({length:N}, () => 650);
+    case "flash":           // perfil_flash()
+      return Array.from({length:N}, (_,k) => (t(k) >= 10 && t(k) < 12) ? 1200 : 300);
+    default:
+      return Array.from({length:N}, () => 0);
+  }
+}
+
+// ── SIMULACIÓN — réplica directa de simular()/pi_step()/lux_total_medido() ────
+function simulate() {
+  seed = 42;
+  const dt       = 0.5;            // DT
+  const tSim     = get("tSim");    // T_SIM
+  const sp       = get("setpoint");// SETPOINT
+  const Kp       = get("kp");
+  const Ki       = get("ki");
+  const plantaK  = 700;            // PLANTA_K
+  const banda    = 50;             // BANDA
+  const ruidoStd = get("ruido");   // RUIDO_STD
+  const N        = Math.floor(tSim / dt);
+
+  const luxAmbArr = perfilAmbiente(N, dt);
+
+  let duty     = get("dutyIni") / 100;  // duty_inicial
+  let integral = 0;
+  simData = [];
+
+  for (let k = 0; k < N; k++) {
+    // lux_total_medido(duty, lux_ambiente, ruido=True)
+    let luxMed = luxAmbArr[k] + duty * plantaK + randn() * ruidoStd;
+    luxMed = Math.max(0, luxMed);
+
+    const error = sp - luxMed;
+
+    // pi_step(error, integral, duty) — con anti-windup
+    const intCand  = integral + error * dt;
+    const dutyCand = duty + Kp * error + Ki * intCand;
+    const intNew   = (dutyCand > 0 && dutyCand < 1) ? intCand : integral;
+    duty           = Math.min(1, Math.max(0, duty + Kp * error + Ki * intNew));
+    integral       = intNew;
+
+    simData.push({ t: k * dt, luxAmb: luxAmbArr[k], luxTotal: luxMed, error, duty: duty * 100 });
+  }
+
+  // Métricas estado estable: igual que reportar() en Python, desde t=25s
+  const ss      = simData.filter(d => d.t >= 25);
+  const errAbs  = ss.map(d => Math.abs(d.error));
+  const maxErr  = errAbs.length ? Math.max(...errAbs) : 0;
+  const meanErr = errAbs.length ? errAbs.reduce((a,b)=>a+b,0) / errAbs.length : 0;
+  const dutyFin = simData[simData.length-1]?.duty ?? 0;
+  const ok      = maxErr <= banda;
+
+  const mE = document.getElementById("m-errMax");
+  mE.textContent = maxErr.toFixed(1);
+  mE.style.color = ok ? "#00d68f" : "#ff4d4d";
+  document.getElementById("m-errMed").textContent = meanErr.toFixed(1);
+  document.getElementById("m-duty").textContent   = dutyFin.toFixed(1);
+  document.getElementById("m-sp").textContent     = sp;
+
+  const badge = document.getElementById("statusBadge");
+  badge.className = "header-badge " + (ok ? "badge-ok" : "badge-err");
+  badge.textContent = ok ? `● Estable (±${banda} lux)` : `● Fuera de banda (±${banda} lux)`;
+
+  const escInfo = ESCENARIOS.find(e => e.id === escenario);
+  // Barra de información eliminada
+
+  drawCharts(sp, banda);
+}
+
+// ── CANVAS CHART RENDERER ─────────────────────────────────────────────────────
+function drawChart(canvasId, series, refLines, yMin, yMax) {
+  const canvas = document.getElementById(canvasId);
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const W = rect.width - 24;
+  const H = parseInt(canvas.getAttribute("height")) * dpr;
+  canvas.width  = W * dpr;
+  canvas.height = H;
+  canvas.style.width  = W + "px";
+  canvas.style.height = parseInt(canvas.getAttribute("height")) + "px";
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+  const w = W, h = parseInt(canvas.getAttribute("height"));
+
+  const PAD = { top:8, right:14, bottom:24, left:52 };
+  const pw = w - PAD.left - PAD.right;
+  const ph = h - PAD.top  - PAD.bottom;
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, w, h);
+
+  const allY = simData.flatMap(d => series.map(s => d[s.key])).concat(refLines.map(r=>r.y));
+  let lo = yMin !== undefined ? yMin : Math.min(...allY);
+  let hi = yMax !== undefined ? yMax : Math.max(...allY);
+  const pad = (hi - lo) * 0.1 || 50;
+  lo -= pad; hi += pad;
+
+  function tx(t)  { return PAD.left + (t / (simData[simData.length-1]?.t || 1)) * pw; }
+  function ty(y)  { return PAD.top  + ph - ((y - lo) / (hi - lo)) * ph; }
+
+  const nGridY = 5;
+  for (let i = 0; i <= nGridY; i++) {
+    const y = lo + (hi - lo) * i / nGridY;
+    const py = ty(y);
+    ctx.strokeStyle = "#e5e7eb"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(PAD.left, py); ctx.lineTo(PAD.left + pw, py); ctx.stroke();
+    ctx.fillStyle = "#6b7280"; ctx.font = "9px Inter"; ctx.textAlign = "right";
+    ctx.fillText(Math.round(y), PAD.left - 4, py + 3);
+  }
+
+  const tMax = simData[simData.length-1]?.t || 1;
+  const nGridX = 8;
+  for (let i = 0; i <= nGridX; i++) {
+    const t = tMax * i / nGridX;
+    const px2 = tx(t);
+    ctx.strokeStyle = "#e5e7eb"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(px2, PAD.top); ctx.lineTo(px2, PAD.top + ph); ctx.stroke();
+    ctx.fillStyle = "#6b7280"; ctx.font = "9px Inter"; ctx.textAlign = "center";
+    ctx.fillText(Math.round(t) + "s", px2, h - 6);
+  }
+
+  refLines.forEach(r => {
+    if (r.band) {
+      ctx.fillStyle = r.band;
+      const y1 = ty(r.y), y2 = ty(-r.y);
+      ctx.fillRect(PAD.left, Math.min(y1,y2), pw, Math.abs(y1-y2));
+    }
+  });
+
+  refLines.forEach(r => {
+    if (r.band) return;
+    ctx.strokeStyle = r.color; ctx.lineWidth = 1.2;
+    ctx.setLineDash([5,3]);
+    ctx.beginPath();
+    ctx.moveTo(PAD.left, ty(r.y)); ctx.lineTo(PAD.left + pw, ty(r.y));
+    ctx.stroke();
+    ctx.setLineDash([]);
+    if (r.label) {
+      ctx.fillStyle = r.color; ctx.font = "9px Inter"; ctx.textAlign = "left";
+      ctx.fillText(r.label, PAD.left + pw - 40, ty(r.y) - 3);
+    }
+  });
+
+  series.forEach(s => {
+    if (!simData.length) return;
+    ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 1.6;
+    if (s.dash) ctx.setLineDash(s.dash); else ctx.setLineDash([]);
+    ctx.beginPath();
+    simData.forEach((d, i) => {
+      const x = tx(d.t), y = ty(d[s.key]);
+      i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  ctx.strokeStyle = "#d1d5db"; ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(PAD.left, PAD.top); ctx.lineTo(PAD.left, PAD.top + ph);
+  ctx.lineTo(PAD.left + pw, PAD.top + ph); ctx.stroke();
+
+  ctx.fillStyle = "#6b7280"; ctx.font = "9px Inter"; ctx.textAlign = "right";
+  ctx.fillText("t [s]", w - 2, h - 6);
+}
+
+function drawCharts(sp, banda) {
+  drawChart("c1",
+    [
+      { key:"luxAmb",   color:"#4f8ef7", width:2   },
+      { key:"luxTotal", color:"#f5a623", width:1.6 },
+    ],
+    [{ y: sp, color:"#f472b6", label:`SP ${sp}` }]
+  );
+
+  drawChart("c2",
+    [{ key:"error", color:"#ff4d4d", width:1.8 }],
+    [
+      { y:  banda, color:"#00d68f", label:`+${banda}` },
+      { y: -banda, color:"#00d68f", label:`-${banda}` },
+      { y:  banda, band:"rgba(0,214,143,0.07)" },
+    ]
+  );
+
+  drawChart("c3",
+    [{ key:"duty", color:"#a78bfa", width:1.8 }],
+    [
+      { y:100, color:"#ff4d4d", label:"100%" },
+      { y:0,   color:"#ff4d4d", label:"0%"   },
+    ],
+    -5, 110
+  );
+}
+
+simulate();
+
+let resizeTimer;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => drawCharts(get("setpoint"), 50), 100);
+});
+</script>
+</body>
+</html>
