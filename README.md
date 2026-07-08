@@ -7,7 +7,7 @@ Este documento explica cómo funciona el dashboard y da un paso a paso para repr
 
 ---
 
-## 1. Qué es esta aplicación
+## 1. Explicacion del Dashboard
 
 Es una simulación interactiva, en el navegador, del sistema de control de brillo de pantalla en donde un controlador **PI (Proporcional-Integral)** ajusta el duty cycle de la retroiluminación para que el brillo total de la pantalla se mantenga cerca de un valor de referencia (setpoint), a pesar de los cambios en la luz ambiente.
 
@@ -27,7 +27,7 @@ No requiere instalar nada: es un único archivo HTML que corre 100% en el navega
 
 ---
 
-## 2. Cómo funciona el modelo (en criollo)
+## 2. Funcionamiento del Modelo
 
 En cada ciclo de simulación (cada `DT = 0.5 s`, igual que el sensor real a 2 Hz):
 
